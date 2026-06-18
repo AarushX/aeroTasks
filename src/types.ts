@@ -39,3 +39,21 @@ export interface ReflectionEntry {
   completedCount: number;
   focusMinutes: number;
 }
+
+export interface SmartList {
+  id: string;
+  label: string;
+  count?: number;
+}
+
+export interface ProjectList {
+  id: string;
+  label: string;
+  color: string;
+  count?: number;
+}
+
+export interface TaskGroup {
+  title: string;
+  tasks: Task[];
+}

@@ -46,6 +46,7 @@ export default function TaskList() {
     if (classId === "tomorrow") return "Tomorrow";
     if (classId === "week") return "Next 7 Days";
     if (classId === "inbox") return "Inbox";
+    if (classId === "completed") return "Completed Tasks";
     
     const workspace = store.classes.find((c) => c.id === classId);
     return workspace ? workspace.name : "Tasks";
@@ -68,6 +69,9 @@ export default function TaskList() {
     if (classId === "inbox") {
       const classIds = store.classes.map((c) => c.id);
       return store.tasks.filter((t) => !classIds.includes(t.listId));
+    }
+    if (classId === "completed") {
+      return store.tasks.filter((t) => t.done);
     }
     return store.tasks.filter((t) => t.listId === classId);
   };

@@ -1,5 +1,5 @@
 import { For, createSignal, Show } from "solid-js";
-import { store, updateTask, activeClassId, setSelectedTaskId } from "../store";
+import { store, updateTask, activeClassId, selectedTaskId, setSelectedTaskId } from "../store";
 import ColumnManagerModal from "./ColumnManagerModal";
 import { IconSettings } from "./icons";
 import { TabHeader } from "./TaskList";
@@ -95,7 +95,7 @@ export default function TriageKanban() {
                       onDragStart={(e) => handleDragStart(e, task.id)}
                       onClick={() => setSelectedTaskId(task.id)}
                       class={`cursor-grab active:cursor-grabbing rounded-lg border p-3 shadow-sm hover:shadow-md transition bg-white ${
-                        setSelectedTaskId() === task.id ? "border-tt-blue bg-blue-50/10" : "border-tt-border"
+                        selectedTaskId() === task.id ? "border-tt-blue bg-blue-50/10" : "border-tt-border"
                       }`}
                     >
                       <div class="font-medium text-slate-700 text-[12.5px] leading-snug">{task.title}</div>

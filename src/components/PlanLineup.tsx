@@ -1,5 +1,5 @@
 import { For, Show } from "solid-js";
-import { store, toggleLineup, activeClassId, setSelectedTaskId } from "../store";
+import { store, toggleLineup, activeClassId } from "../store";
 import { TabHeader } from "./TaskList";
 
 export default function PlanLineup() {
