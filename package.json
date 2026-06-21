@@ -1,0 +1,27 @@
+{
+  "name": "aerotasks",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "aeroTasks — a high-performance cross-platform task manager (TickTick-style UI)",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build"
+  },
+  "dependencies": {
+    "solid-js": "^1.9.3"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.1.0",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.6.3",
+    "vite": "^6.0.3",
+    "vite-plugin-solid": "^2.11.0"
+  }
+}

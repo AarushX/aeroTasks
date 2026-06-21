@@ -48,7 +48,7 @@ export default function TaskItem(props: { task: Task; selected?: boolean }) {
     <div
       onClick={() => setSelectedTaskId(props.task.id)}
       class={`group flex cursor-pointer items-start gap-2.5 rounded-lg px-2.5 py-2 pr-2 transition-colors ${
-        selectedTaskId() === props.task.id ? "bg-blue-50/70" : "hover:bg-tt-hover"
+        selectedTaskId() === props.task.id ? "bg-tt-active" : "hover:bg-tt-hover"
       }`}
     >
       <Checkbox task={props.task} />

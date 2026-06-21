@@ -16,14 +16,16 @@ import {
 
 export function TabHeader() {
   return (
-    <div class="flex items-center border border-tt-border rounded-lg overflow-hidden bg-white shadow-sm">
+    <div class="inline-flex items-center gap-1 rounded-xl bg-tt-line/70 p-1 ring-1 ring-tt-soft">
       <For each={["list", "triage", "plan", "do", "reflect"] as const}>
         {(tab) => (
           <button
             type="button"
             onClick={() => setActiveTab(tab)}
-            class={`px-3 py-1.5 text-[12px] font-semibold border-r last:border-r-0 border-tt-border capitalize transition-colors ${
-              activeTab() === tab ? "bg-tt-blue text-white" : "text-tt-sub hover:bg-black/5"
+            class={`rounded-lg px-3 py-1.5 text-[12px] font-semibold capitalize transition-all ${
+              activeTab() === tab
+                ? "bg-tt-blue text-white shadow-card"
+                : "text-tt-sub hover:bg-white/70 hover:text-tt-text"
             }`}
           >
             {tab}
@@ -99,64 +101,68 @@ export default function TaskList() {
         <TabHeader />
       </header>
 
-      {/* Add task input */}
-      <div class="px-6 mb-3">
-        <form
-          onSubmit={handleAddTaskSubmit}
-          class="flex h-10 items-center gap-2.5 rounded-lg border border-tt-border px-3 text-tt-muted transition-colors focus-within:border-tt-blue hover:border-tt-faint bg-white"
-        >
-          <IconPlus size={16} class="text-tt-blue" />
-          <input
-            type="text"
-            placeholder="Add task to this workspace..."
-            value={taskTitle()}
-            onInput={(e) => setTaskTitle(e.currentTarget.value)}
-            class="flex-1 text-[13px] text-tt-text outline-none placeholder:text-tt-faint bg-transparent"
-          />
-          <button
-            type="button"
-            class="flex h-7 w-7 items-center justify-center rounded hover:bg-tt-hover"
-            title="Due date"
+      {/* Add task input — hidden in the completed-only view */}
+      <Show when={activeClassId() !== "completed"}>
+        <div class="px-6 mb-3">
+          <form
+            onSubmit={handleAddTaskSubmit}
+            class="flex h-10 items-center gap-2.5 rounded-lg border border-tt-border px-3 text-tt-muted transition-colors focus-within:border-tt-blue hover:border-tt-faint bg-white"
           >
-            <IconCalendar size={16} />
-          </button>
-          <button
-            type="button"
-            class="flex h-7 w-7 items-center justify-center rounded hover:bg-tt-hover"
-            title="Priority"
-          >
-            <IconFlag size={16} />
-          </button>
-        </form>
-      </div>
+            <IconPlus size={16} class="text-tt-blue" />
+            <input
+              type="text"
+              placeholder="Add task to this workspace..."
+              value={taskTitle()}
+              onInput={(e) => setTaskTitle(e.currentTarget.value)}
+              class="flex-1 text-[13px] text-tt-text outline-none placeholder:text-tt-faint bg-transparent"
+            />
+            <button
+              type="button"
+              class="flex h-7 w-7 items-center justify-center rounded hover:bg-tt-hover"
+              title="Due date"
+            >
+              <IconCalendar size={16} />
+            </button>
+            <button
+              type="button"
+              class="flex h-7 w-7 items-center justify-center rounded hover:bg-tt-hover"
+              title="Priority"
+            >
+              <IconFlag size={16} />
+            </button>
+          </form>
+        </div>
+      </Show>
 
       {/* Task groups */}
       <div class="flex-1 overflow-y-auto px-4 pb-8 space-y-4">
-        {/* Active tasks */}
-        <section>
-          <button
-            type="button"
-            onClick={() => setActiveOpen(!activeOpen())}
-            class="flex items-center gap-1.5 px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-tt-sub hover:text-tt-text"
-          >
-            <IconChevronDown
-              size={12}
-              class={`transform transition-transform ${activeOpen() ? "" : "-rotate-90"}`}
-            />
-            <span>Active</span>
-            <span class="ml-1 rounded-full bg-slate-100 px-1.5 text-[10px] text-tt-muted">
-              {activeTasks().length}
-            </span>
-          </button>
-          
-          <Show when={activeOpen()}>
-            <div class="mt-1.5 space-y-px">
-              <For each={activeTasks()} fallback={<div class="text-slate-400 text-xs px-2 py-3">No active tasks in this view</div>}>
-                {(task) => <TaskItem task={task} />}
-              </For>
-            </div>
-          </Show>
-        </section>
+        {/* Active tasks — hidden when browsing the completed-only view */}
+        <Show when={activeClassId() !== "completed"}>
+          <section>
+            <button
+              type="button"
+              onClick={() => setActiveOpen(!activeOpen())}
+              class="flex items-center gap-1.5 px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-tt-sub hover:text-tt-text"
+            >
+              <IconChevronDown
+                size={12}
+                class={`transform transition-transform ${activeOpen() ? "" : "-rotate-90"}`}
+              />
+              <span>Active</span>
+              <span class="ml-1 rounded-full bg-slate-100 px-1.5 text-[10px] text-tt-muted">
+                {activeTasks().length}
+              </span>
+            </button>
+
+            <Show when={activeOpen()}>
+              <div class="mt-1.5 space-y-px">
+                <For each={activeTasks()} fallback={<div class="text-slate-400 text-xs px-2 py-3">No active tasks in this view</div>}>
+                  {(task) => <TaskItem task={task} />}
+                </For>
+              </div>
+            </Show>
+          </section>
+        </Show>
 
         {/* Completed tasks */}
         <Show when={completedTasks().length > 0}>
@@ -175,7 +181,7 @@ export default function TaskList() {
                 {completedTasks().length}
               </span>
             </button>
-            
+
             <Show when={completedOpen()}>
               <div class="mt-1.5 space-y-px">
                 <For each={completedTasks()}>
@@ -184,6 +190,14 @@ export default function TaskList() {
               </div>
             </Show>
           </section>
+        </Show>
+
+        {/* Empty state for completed view when nothing is done yet */}
+        <Show when={activeClassId() === "completed" && completedTasks().length === 0}>
+          <div class="flex flex-col items-center justify-center py-16 text-tt-faint select-none gap-1">
+            <span class="text-[13px]">No completed tasks yet</span>
+            <span class="text-[11.5px]">Complete tasks to see them here</span>
+          </div>
         </Show>
       </div>
     </main>

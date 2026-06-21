@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  color: #1f2329;
+  background: #ffffff;
+  font-feature-settings: "kern";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overscroll-behavior: none;
+}
+
+/* Thin, desktop-app-style scrollbars */
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.14);
+  border-radius: 4px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.26);
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Reveal row actions only on hover */
+.row-actions {
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+.group:hover .row-actions {
+  opacity: 1;
+}

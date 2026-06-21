@@ -50,16 +50,16 @@ export default function TriageKanban() {
   return (
     <div class="flex flex-1 flex-col overflow-hidden bg-white">
       {/* Header */}
-      <header class="flex h-14 items-center justify-between border-b border-tt-border px-6">
+      <header class="flex h-14 items-center justify-between border-b border-tt-line px-6">
         <div class="flex items-center gap-4">
           <h1 class="text-[17px] font-semibold text-tt-text">Triage Board</h1>
         </div>
-        
+
         <div class="flex items-center gap-3">
           <button
             type="button"
             onClick={() => setModalOpen(true)}
-            class="flex items-center gap-1.5 rounded-lg border border-tt-border bg-white px-3 py-1.5 text-[12.5px] font-medium text-tt-text hover:bg-black/5 transition shadow-sm"
+            class="flex items-center gap-1.5 rounded-xl bg-white ring-1 ring-tt-soft px-3 py-1.5 text-[12.5px] font-medium text-tt-text hover:shadow-soft transition shadow-card"
           >
             <IconSettings size={15} class="text-tt-sub" />
             <span>Manage Columns</span>
@@ -76,26 +76,26 @@ export default function TriageKanban() {
               onDragOver={(e) => e.preventDefault()}
               onDragEnter={(e) => e.preventDefault()}
               onDrop={(e) => handleDrop(e, col.urgent, col.important)}
-              class="flex w-64 flex-shrink-0 flex-col rounded-xl border border-tt-border bg-white shadow-sm overflow-hidden h-full max-h-[calc(100vh-140px)]"
+              class="flex w-64 flex-shrink-0 flex-col rounded-2xl border border-tt-soft bg-white shadow-soft overflow-hidden h-full max-h-[calc(100vh-140px)]"
             >
               {/* Column header */}
-              <div class="border-b border-tt-border px-4 py-3 bg-white flex items-center justify-between">
+              <div class="border-b border-tt-line px-4 py-3 bg-white flex items-center justify-between">
                 <h3 class="font-semibold text-tt-text text-[13px] truncate">{col.name}</h3>
-                <span class="text-[11px] font-bold text-tt-muted bg-slate-100 rounded-full px-2 py-0.5">
+                <span class="text-[11px] font-bold text-tt-muted bg-tt-line rounded-full px-2 py-0.5">
                   {getColumnTasks(col.urgent, col.important).length}
                 </span>
               </div>
-              
+
               {/* Column list */}
-              <div class="flex-1 overflow-y-auto p-3 space-y-2.5 bg-slate-50/30">
+              <div class="flex-1 overflow-y-auto p-2.5 space-y-2 bg-tt-surface">
                 <For each={getColumnTasks(col.urgent, col.important)}>
                   {(task) => (
                     <div
                       draggable={true}
                       onDragStart={(e) => handleDragStart(e, task.id)}
                       onClick={() => setSelectedTaskId(task.id)}
-                      class={`cursor-grab active:cursor-grabbing rounded-lg border p-3 shadow-sm hover:shadow-md transition bg-white ${
-                        selectedTaskId() === task.id ? "border-tt-blue bg-blue-50/10" : "border-tt-border"
+                      class={`cursor-grab active:cursor-grabbing rounded-xl p-3 shadow-card hover:shadow-lift hover:-translate-y-px transition-all bg-white ring-1 ${
+                        selectedTaskId() === task.id ? "ring-tt-blue/60 bg-tt-bluefaint/40" : "ring-tt-soft"
                       }`}
                     >
                       <div class="font-medium text-slate-700 text-[12.5px] leading-snug">{task.title}</div>

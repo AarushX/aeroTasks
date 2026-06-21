@@ -1,4 +1,3 @@
-import IconRail from "./components/IconRail";
 import Sidebar from "./components/Sidebar";
 import TaskList from "./components/TaskList";
 import TriageKanban from "./components/TriageKanban";
@@ -12,7 +11,6 @@ import { Show } from "solid-js";
 export default function App() {
   return (
     <div class="flex h-full w-full overflow-hidden bg-white font-sans text-[13px] leading-5 text-tt-text antialiased select-none">
-      <IconRail />
       <Sidebar />
       
       {/* Dynamic Main View */}

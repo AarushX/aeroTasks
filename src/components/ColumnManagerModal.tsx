@@ -29,10 +29,10 @@ export default function ColumnManagerModal(props: { onClose: () => void }) {
   };
 
   return (
-    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-      <div class="w-[450px] rounded-xl border border-tt-border bg-white shadow-xl flex flex-col max-h-[80vh] overflow-hidden">
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-tt-text/30 backdrop-blur-md">
+      <div class="w-[460px] rounded-[22px] border border-tt-soft bg-white shadow-panel flex flex-col max-h-[80vh] overflow-hidden">
         {/* Header */}
-        <div class="flex items-center justify-between border-b border-tt-border p-4">
+        <div class="flex items-center justify-between border-b border-tt-line px-5 py-4">
           <h2 class="text-sm font-semibold text-tt-text uppercase tracking-wide">Manage Columns</h2>
           <button
             type="button"
@@ -44,10 +44,10 @@ export default function ColumnManagerModal(props: { onClose: () => void }) {
         </div>
 
         {/* List of columns */}
-        <div class="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/50">
+        <div class="flex-1 overflow-y-auto p-4 space-y-2.5 bg-tt-surface">
           <For each={store.columns}>
             {(col) => (
-              <div class="flex items-center justify-between rounded-lg border border-tt-border p-3 bg-white shadow-sm gap-4">
+              <div class="flex items-center justify-between rounded-xl ring-1 ring-tt-soft p-3 bg-white shadow-card gap-4">
                 <div class="flex-1 min-w-0">
                   <input
                     type="text"
@@ -89,7 +89,7 @@ export default function ColumnManagerModal(props: { onClose: () => void }) {
         </div>
 
         {/* Add column form */}
-        <div class="border-t border-tt-border p-4 space-y-3 bg-white">
+        <div class="border-t border-tt-line p-5 space-y-3 bg-white">
           <h3 class="font-bold text-tt-text text-xs uppercase tracking-wider">Add New Column</h3>
           <div class="flex gap-2">
             <input
@@ -97,12 +97,12 @@ export default function ColumnManagerModal(props: { onClose: () => void }) {
               placeholder="Column Name"
               value={newColName()}
               onInput={(e) => setNewColName(e.currentTarget.value)}
-              class="flex-1 rounded-lg border border-tt-border px-3 py-1.5 text-[12.5px] outline-none focus:border-tt-blue bg-slate-50/50"
+              class="flex-1 rounded-xl bg-tt-line/50 px-3 py-2 text-[12.5px] outline-none ring-1 ring-transparent focus:ring-tt-blue/30 focus:bg-white transition"
             />
             <button
               type="button"
               onClick={handleAdd}
-              class="rounded-lg bg-tt-blue hover:bg-tt-bluehover px-4 py-1.5 text-[12.5px] font-semibold text-white transition shadow-sm"
+              class="rounded-xl bg-tt-blue hover:bg-tt-bluehover px-4 py-2 text-[12.5px] font-semibold text-white transition shadow-card hover:shadow-lift"
             >
               Add
             </button>

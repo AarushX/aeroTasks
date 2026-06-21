@@ -1,6 +1,7 @@
 import { createSignal, onCleanup, For, Show } from "solid-js";
-import { store, updateTask, addFocusMinutes } from "../store";
+import { store, updateTask, addFocusMinutes, removeFromLineup } from "../store";
 import { TabHeader } from "./TaskList";
+
 
 type TimerState = "focus" | "shortBreak" | "longBreak";
 
@@ -14,19 +15,28 @@ export default function DoPomodoro() {
   const [timerState, setTimerState] = createSignal<TimerState>("focus");
   const [timeLeft, setTimeLeft] = createSignal(DURATIONS.focus);
   const [isRunning, setIsRunning] = createSignal(false);
+  const [banner, setBanner] = createSignal("");
   let intervalId: number | null = null;
+  let bannerTimer: number | null = null;
+
+  const showBanner = (msg: string) => {
+    setBanner(msg);
+    if (bannerTimer) clearTimeout(bannerTimer);
+    bannerTimer = window.setTimeout(() => setBanner(""), 4000);
+  };
 
   const startTimer = () => {
     if (isRunning()) return;
     setIsRunning(true);
     intervalId = window.setInterval(() => {
-      setTimeLeft((time) => {
-        if (time <= 1) {
-          handleTimerExpire();
-          return 0;
-        }
-        return time - 1;
-      });
+      // Decrement outside of nested setter calls. Calling handleTimerExpire()
+      // inside a setTimeLeft updater would re-enter setTimeLeft and then get
+      // clobbered by the outer updater's return value (leaving the timer at 0).
+      if (timeLeft() <= 0) {
+        handleTimerExpire();
+      } else {
+        setTimeLeft((time) => time - 1);
+      }
     }, 1000);
   };
 
@@ -52,19 +62,19 @@ export default function DoPomodoro() {
   const handleTimerExpire = () => {
     pauseTimer();
     if (timerState() === "focus") {
-      // Log focus time
       addFocusMinutes(25);
-      alert("Focus block complete! Time for a short break.");
+      showBanner("Focus block complete! Take a short break.");
       handleStateChange("shortBreak");
     } else {
-      alert("Break over! Ready to focus?");
+      showBanner("Break over — ready to focus!");
       handleStateChange("focus");
     }
   };
 
   const handleComplete = (taskId: string) => {
     updateTask(taskId, { done: true, completedAt: new Date().toISOString() });
-    // Keep timer running or pause? Usually pause on task complete or keep going
+    // Marking done removes it from the lineup and advances to the next item (AC-006).
+    removeFromLineup(taskId);
   };
 
   const getLineupTasks = () => {
@@ -83,15 +93,23 @@ export default function DoPomodoro() {
 
   onCleanup(() => {
     if (intervalId) window.clearInterval(intervalId);
+    if (bannerTimer) window.clearTimeout(bannerTimer);
   });
 
   return (
     <div class="flex flex-1 flex-col overflow-hidden bg-white">
       {/* Header */}
-      <header class="flex h-14 items-center justify-between border-b border-tt-border px-6">
+      <header class="flex h-14 items-center justify-between border-b border-tt-line px-6">
         <h1 class="text-[17px] font-semibold text-tt-text font-sans">Focus Mode (Pomodoro)</h1>
         <TabHeader />
       </header>
+
+      {/* Timer expiry / state-change banner */}
+      <Show when={banner()}>
+        <div class="mx-6 mt-3 rounded-xl bg-tt-bluefaint ring-1 ring-tt-blue/20 px-4 py-2.5 text-[12.5px] font-semibold text-tt-blue text-center select-none shadow-card">
+          {banner()}
+        </div>
+      </Show>
 
       {/* Main layout */}
       <div class="flex-1 overflow-y-auto p-8 flex flex-col items-center justify-center bg-slate-50/50">
@@ -105,16 +123,16 @@ export default function DoPomodoro() {
           }
         >
           {/* Pomodoro Timer Box */}
-          <div class="flex w-96 flex-col items-center rounded-2xl border border-tt-border bg-white p-8 shadow-sm text-center">
+          <div class="flex w-96 flex-col items-center rounded-[24px] border border-tt-soft bg-white p-8 shadow-panel text-center">
             {/* Mode selection buttons */}
-            <div class="flex border border-slate-200 rounded-lg p-1 bg-slate-50 mb-6">
+            <div class="flex gap-1 rounded-xl p-1 bg-tt-line/70 ring-1 ring-tt-soft mb-6">
               <button
                 type="button"
                 onClick={() => handleStateChange("focus")}
-                class={`px-3 py-1 rounded text-xs font-semibold select-none transition ${
+                class={`px-3 py-1.5 rounded-lg text-xs font-semibold select-none transition-all ${
                   timerState() === "focus"
-                    ? "bg-tt-blue text-white shadow-sm"
-                    : "text-slate-500 hover:text-slate-800"
+                    ? "bg-tt-blue text-white shadow-card"
+                    : "text-slate-500 hover:bg-white/70 hover:text-slate-800"
                 }`}
               >
                 Pomodoro
@@ -122,10 +140,10 @@ export default function DoPomodoro() {
               <button
                 type="button"
                 onClick={() => handleStateChange("shortBreak")}
-                class={`px-3 py-1 rounded text-xs font-semibold select-none transition ${
+                class={`px-3 py-1.5 rounded-lg text-xs font-semibold select-none transition-all ${
                   timerState() === "shortBreak"
-                    ? "bg-tt-blue text-white shadow-sm"
-                    : "text-slate-500 hover:text-slate-800"
+                    ? "bg-tt-blue text-white shadow-card"
+                    : "text-slate-500 hover:bg-white/70 hover:text-slate-800"
                 }`}
               >
                 Short Break
@@ -133,10 +151,10 @@ export default function DoPomodoro() {
               <button
                 type="button"
                 onClick={() => handleStateChange("longBreak")}
-                class={`px-3 py-1 rounded text-xs font-semibold select-none transition ${
+                class={`px-3 py-1.5 rounded-lg text-xs font-semibold select-none transition-all ${
                   timerState() === "longBreak"
-                    ? "bg-tt-blue text-white shadow-sm"
-                    : "text-slate-500 hover:text-slate-800"
+                    ? "bg-tt-blue text-white shadow-card"
+                    : "text-slate-500 hover:bg-white/70 hover:text-slate-800"
                 }`}
               >
                 Long Break
@@ -220,7 +238,7 @@ export default function DoPomodoro() {
               }
             >
               {(task) => (
-                <div class="flex items-center gap-3 rounded-lg border border-tt-border bg-white p-3 shadow-sm select-none">
+                <div class="flex items-center gap-3 rounded-xl ring-1 ring-tt-soft bg-white p-3 shadow-card select-none">
                   <span class="h-2 w-2 rounded-full bg-slate-300" />
                   <span class="font-medium text-slate-700 text-xs truncate flex-1">{task.title}</span>
                 </div>

@@ -1,5 +1,5 @@
 import { createStore } from "solid-js/store";
-import { createEffect, createSignal } from "solid-js";
+import { createEffect, createSignal, createRoot } from "solid-js";
 import type { Task, KanbanColumn, ClassWorkspace, ReflectionEntry } from "./types";
 
 const STORAGE_KEY = "aerotasks_state";
@@ -62,37 +62,59 @@ const initialTasks: Task[] = [
   },
 ];
 
+type TabId = "list" | "triage" | "plan" | "do" | "reflect";
+
 const saved = localStorage.getItem(STORAGE_KEY);
-const initialState: AppState = saved
-  ? JSON.parse(saved)
-  : {
-      tasks: initialTasks,
-      classes: defaultClasses,
-      columns: defaultColumns,
-      lineup: [],
-      reflections: [],
-    };
+const parsed = saved ? JSON.parse(saved) : null;
+
+const initialState: AppState = {
+  tasks: parsed?.tasks ?? initialTasks,
+  classes: parsed?.classes ?? defaultClasses,
+  columns: parsed?.columns ?? defaultColumns,
+  lineup: parsed?.lineup ?? [],
+  reflections: parsed?.reflections ?? [],
+};
 
 export const [store, setStore] = createStore<AppState>(initialState);
 
-createEffect(() => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
-});
+// Navigation signals (persisted across reloads — see spec AC-001)
+export const [activeTab, setActiveTab] = createSignal<TabId>(parsed?.activeTab ?? "list");
+export const [activeClassId, setActiveClassId] = createSignal<string>(parsed?.activeClassId ?? "all");
+export const [selectedTaskId, setSelectedTaskId] = createSignal<string | null>(
+  parsed && "selectedTaskId" in parsed ? parsed.selectedTaskId : "t3"
+);
 
-// Navigation signals
-export const [activeTab, setActiveTab] = createSignal<"list" | "triage" | "plan" | "do" | "reflect">("list");
-export const [activeClassId, setActiveClassId] = createSignal<string>("all");
-export const [selectedTaskId, setSelectedTaskId] = createSignal<string | null>("t3");
+// Persist all app + navigation state. Wrapped in createRoot so the effect has
+// an owner (otherwise Solid warns it "will never be disposed").
+createRoot(() => {
+  createEffect(() => {
+    const snapshot = {
+      tasks: store.tasks,
+      classes: store.classes,
+      columns: store.columns,
+      lineup: store.lineup,
+      reflections: store.reflections,
+      activeTab: activeTab(),
+      activeClassId: activeClassId(),
+      selectedTaskId: selectedTaskId(),
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
+  });
+});
 
 // Mutators
 export function addTask(title: string, listId: string) {
+  // Smart-list / virtual views (all, today, completed, ...) aren't real classes,
+  // so a task captured from one defaults to the first workspace instead of
+  // getting an orphan listId that matches no class.
+  const isRealClass = store.classes.some((c) => c.id === listId);
   const newTask: Task = {
     id: "t_" + Date.now(),
     title,
     done: false,
     urgent: false,
     important: false,
-    listId: listId === "all" || listId === "today" || listId === "tomorrow" || listId === "week" || listId === "inbox" ? "work" : listId,
+    listId: isRealClass ? listId : store.classes[0]?.id ?? "work",
   };
   setStore("tasks", (tasks) => [newTask, ...tasks]);
   setSelectedTaskId(newTask.id);
@@ -114,6 +136,10 @@ export function toggleLineup(taskId: string) {
   } else if (store.lineup.length < 3) {
     setStore("lineup", (lineup) => [...lineup, taskId]);
   }
+}
+
+export function removeFromLineup(taskId: string) {
+  setStore("lineup", (lineup) => lineup.filter((id) => id !== taskId));
 }
 
 export function saveReflection(note: string) {
